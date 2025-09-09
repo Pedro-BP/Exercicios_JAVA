@@ -31,14 +31,14 @@ public class Ex05_Jogo_de_par_ou_ímpar {
 
             System.out.print("Digite um número de 0 a 5: ");
             int numeroUsuario = sc.nextInt();
-            sc.nextLine(); // limpar buffer
+            sc.nextLine();
 
             if (numeroUsuario < 0 || numeroUsuario > 5) {
                 System.out.println("Número inválido! Apenas entre 0 e 5.");
                 continue;
             }
 
-            int numeroComputador = random.nextInt(6); // 0 a 5
+            int numeroComputador = random.nextInt(6);
             int soma = numeroUsuario + numeroComputador;
 
             System.out.println("Você jogou: " + numeroUsuario);
@@ -56,3 +56,4 @@ public class Ex05_Jogo_de_par_ou_ímpar {
         }
     }
 }
+
