@@ -98,31 +98,174 @@ public class Dungeon {
         visitado[jogadorX][jogadorY] = true;
     }
 
-    public void mostrar() {
-        for (int i = 0; i < tamanho; i++) {
-            for (int j = 0; j < tamanho; j++) {
-                if (i == jogadorX && j == jogadorY) {
-                    System.out.print(" & ");
-                } else if (!visitado[i][j]) {
-                    System.out.print(" * ");
-                } else if (i == saidaX && j == saidaY) {
-                    System.out.print(" ¬ ");
-                } else if (i == chefeX && j == chefeY) {
-                    System.out.print(" $ ");
-                } else {
-                    System.out.print(" + ");
-                }
-            }
-            System.out.println();
-        }
-    }
+public void mostrar() {
+    // Códigos ANSI de cor
+    final String RESET = "\u001B[0m";
+    final String VERDE = "\u001B[32m";
+    final String VERMELHO = "\u001B[31m";
+    final String AZUL = "\u001B[34m";
+    final String CINZA = "\u001B[37m";
+    final String AMARELO = "\u001B[33m";
+    final String ROXO = "\u001B[35m";
 
+    System.out.println("\n" + ROXO + "╔" + "═══".repeat(tamanho) + "╗" + RESET);
+    for (int i = 0; i < tamanho; i++) {
+        System.out.print(ROXO + "║" + RESET);
+        for (int j = 0; j < tamanho; j++) {
+            if (i == jogadorX && j == jogadorY) {
+                System.out.print(AMARELO + " & " + RESET); // jogador
+            } else if (!visitado[i][j]) {
+                System.out.print(CINZA + " * " + RESET); // área não explorada
+            } else if (i == saidaX && j == saidaY) {
+                System.out.print(AZUL + " ¬ " + RESET); // saída
+            } else if (i == chefeX && j == chefeY) {
+                System.out.print(VERMELHO + " $ " + RESET); // chefe
+            } else {
+                System.out.print(VERDE + " + " + RESET); // área explorada
+            }
+        }
+        System.out.println(ROXO + "║" + RESET);
+    }
+    System.out.println(ROXO + "╚" + "═══".repeat(tamanho) + "╝" + RESET);
+}
+
+/*
+    public void mostrar() {
+    System.out.println("\n╔" + "═══".repeat(tamanho) + "╗");
+    for (int i = 0; i < tamanho; i++) {
+        System.out.print("║");
+        for (int j = 0; j < tamanho; j++) {
+            if (i == jogadorX && j == jogadorY) {
+                System.out.print(" & "); // jogador
+            } else if (!visitado[i][j]) {
+                System.out.print(" * "); // área não explorada
+            } else if (i == saidaX && j == saidaY) {
+                System.out.print(" ¬ "); // saída
+            } else if (i == chefeX && j == chefeY) {
+                System.out.print(" $ "); // chefe
+            } else {
+                System.out.print(" + "); // área explorada
+            }
+        }
+        System.out.println("║");
+    }
+    System.out.println("╚" + "═══".repeat(tamanho) + "╝");
+}
+*/
     public boolean chegouNaSaida() {
         return jogadorX == saidaX && jogadorY == saidaY;
     }
 
     public boolean encontrouChefe() {
         return jogadorX == chefeX && jogadorY == chefeY;
+    }
+}
+
+====================================================================================================================================================================================
+
+package com.mycompany.projeto_rpg;
+
+import java.util.Random;
+import java.util.Scanner;
+
+public class CombateBoss {
+
+    private int vidaJogador;
+    private int vidaBoss;
+    private int ataqueJogador;
+    private int ataqueBoss;
+    private int nivel;
+    private Random random = new Random();
+
+    public CombateBoss(int nivel) {
+        this.nivel = nivel;
+        gerarAtributos();
+    }
+
+    private void gerarAtributos() {
+        // Atributos escalam com o nível
+        vidaJogador = 100 + (nivel * 5);
+        ataqueJogador = 10 + (nivel / 2);
+
+        // Boss é mais forte proporcionalmente
+        vidaBoss = 80 + (nivel * 10);
+        ataqueBoss = 8 + (nivel / 1.5);
+    }
+
+    public boolean iniciarCombate() {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("\nO CHEFE APARECEU! ");
+        System.out.println("Um inimigo poderoso está diante de você!\n");
+
+        while (vidaJogador > 0 && vidaBoss > 0) {
+            System.out.println("====================================");
+            System.out.println("Sua vida: " + vidaJogador + " | Vida do Chefe: " + vidaBoss);
+            System.out.println("====================================");
+            System.out.println("[1] Atacar");
+            System.out.println("[2] Defender");
+            System.out.println("[3] Curar");
+            System.out.println("[4] Fugir");
+            System.out.print("Escolha sua ação: ");
+
+            int escolha = sc.nextInt();
+            System.out.println();
+
+            switch (escolha) {
+                case 1 -> atacar();
+                case 2 -> defender();
+                case 3 -> curar();
+                case 4 -> {
+                    System.out.println("Você tenta fugir...");
+                    if (random.nextInt(100) < 30) {
+                        System.out.println("Você conseguiu escapar!");
+                        return false;
+                    } else {
+                        System.out.println("O chefe bloqueou sua fuga!");
+                    }
+                }
+                default -> System.out.println("Comando inválido!");
+            }
+
+            if (vidaBoss <= 0) {
+                System.out.println("Você derrotou o chefe! Parabéns!");
+                return true;
+            }
+
+            // Turno do chefe
+            ataqueDoChefe();
+        }
+
+        if (vidaJogador <= 0) {
+            System.out.println("Você foi derrotado pelo chefe...");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void atacar() {
+        int dano = ataqueJogador + random.nextInt(6) - 2;
+        System.out.println("Você ataca e causa " + dano + " de dano!");
+        vidaBoss -= Math.max(dano, 0);
+    }
+
+    private void defender() {
+        int dano = Math.max((ataqueBoss / 2) - random.nextInt(3), 0);
+        System.out.println("Você se defende! Recebe apenas " + dano + " de dano.");
+        vidaJogador -= dano;
+    }
+
+    private void curar() {
+        int cura = 10 + random.nextInt(10);
+        vidaJogador += cura;
+        System.out.println("Você se cura em " + cura + " pontos de vida.");
+    }
+
+    private void ataqueDoChefe() {
+        int dano = ataqueBoss + random.nextInt(6) - 2;
+        System.out.println("O chefe ataca e causa " + dano + " de dano!");
+        vidaJogador -= Math.max(dano, 0);
     }
 }
 
@@ -155,6 +298,14 @@ public class Jogo {
             }
             if (dungeon.encontrouChefe()) {
                 System.out.println("Você encontrou o CHEFE! Prepare-se para lutar!");
+                CombateBoss combate = new CombateBoss(10); // passa o nível do personagem
+                boolean venceu = combate.iniciarCombate();
+
+                if (venceu) {
+                    System.out.println("\nVocê conquistou esta dungeon! 🏆");
+                } else {
+                    System.out.println("\nFim de jogo...");
+                }
                 break;
             }
 
