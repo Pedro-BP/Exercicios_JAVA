@@ -12,26 +12,64 @@ public class CombateBoss {
     private int nivel;
     private Random random = new Random();
 
+    private String nomeBoss; // nome do chefe
+    private String tipoBoss; // tipo de comportamento (agressivo, defensivo, mágico etc.)
+
     public CombateBoss(int nivel) {
         this.nivel = nivel;
-        gerarAtributos();
+        definirTipoBoss();     // define o estilo do chefe
+        gerarAtributos();      // gera atributos conforme o nível e o tipo
+    }
+
+    private void definirTipoBoss() {
+        if (nivel < 20) {
+            nomeBoss = "Goblin Rei";
+            tipoBoss = "agressivo";
+        } else if (nivel < 40) {
+            nomeBoss = "Cavaleiro Sombrio";
+            tipoBoss = "defensivo";
+        } else if (nivel < 60) {
+            nomeBoss = "Mago Ancião";
+            tipoBoss = "mágico";
+        } else if (nivel < 80) {
+            nomeBoss = "Demônio de Fogo";
+            tipoBoss = "caótico";
+        } else {
+            nomeBoss = "Dragão Ancestral";
+            tipoBoss = "lendário";
+        }
     }
 
     private void gerarAtributos() {
-        // Atributos escalam com o nível
+        // Escala dos atributos com base no nível
         vidaJogador = 100 + (nivel * 5);
         ataqueJogador = 10 + (nivel / 2);
 
-        // Boss é mais forte proporcionalmente
+        // Base do chefe
         vidaBoss = 80 + (nivel * 10);
         ataqueBoss = (int) (8 + (nivel / 1.5));
+
+        // Modificadores de tipo
+        switch (tipoBoss) {
+            case "agressivo" -> ataqueBoss *= 1.3;
+            case "defensivo" -> vidaBoss *= 1.4;
+            case "mágico" -> {
+                ataqueBoss *= 1.1;
+                vidaBoss *= 1.1;
+            }
+            case "caótico" -> ataqueBoss *= 1.6;
+            case "lendário" -> {
+                ataqueBoss *= 1.8;
+                vidaBoss *= 2.0;
+            }
+        }
     }
 
     public boolean iniciarCombate() {
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("\nO CHEFE APARECEU! ");
-        System.out.println("Um inimigo poderoso está diante de você!\n");
+        System.out.println("\n⚔️  O " + nomeBoss.toUpperCase() + " APARECEU! ⚔️");
+        System.out.println("Um inimigo " + tipoBoss + " está diante de você!\n");
 
         while (vidaJogador > 0 && vidaBoss > 0) {
             System.out.println("====================================");
@@ -56,14 +94,14 @@ public class CombateBoss {
                         System.out.println("Você conseguiu escapar!");
                         return false;
                     } else {
-                        System.out.println("O chefe bloqueou sua fuga!");
+                        System.out.println("O " + nomeBoss + " bloqueou sua fuga!");
                     }
                 }
                 default -> System.out.println("Comando inválido!");
             }
 
             if (vidaBoss <= 0) {
-                System.out.println("Você derrotou o chefe! Parabéns!");
+                System.out.println("Você derrotou o " + nomeBoss + "! Parabéns!");
                 return true;
             }
 
@@ -72,7 +110,7 @@ public class CombateBoss {
         }
 
         if (vidaJogador <= 0) {
-            System.out.println("Você foi derrotado pelo chefe...");
+            System.out.println("Você foi derrotado pelo " + nomeBoss + "...");
             return false;
         }
 
@@ -99,7 +137,30 @@ public class CombateBoss {
 
     private void ataqueDoChefe() {
         int dano = ataqueBoss + random.nextInt(6) - 2;
-        System.out.println("O chefe ataca e causa " + dano + " de dano!");
+
+        // comportamento especial conforme o tipo
+        switch (tipoBoss) {
+            case "mágico" -> {
+                if (random.nextInt(100) < 25) {
+                    System.out.println("O " + nomeBoss + " lança uma magia poderosa!");
+                    dano *= 1.5;
+                }
+            }
+            case "caótico" -> {
+                if (random.nextInt(100) < 15) {
+                    System.out.println("O " + nomeBoss + " entra em frenesi!");
+                    dano *= 2;
+                }
+            }
+            case "lendário" -> {
+                if (random.nextInt(100) < 20) {
+                    System.out.println("🔥 O " + nomeBoss + " exala chamas infernais!");
+                    dano *= 2.5;
+                }
+            }
+        }
+
+        System.out.println("O " + nomeBoss + " ataca e causa " + dano + " de dano!");
         vidaJogador -= Math.max(dano, 0);
     }
 }
