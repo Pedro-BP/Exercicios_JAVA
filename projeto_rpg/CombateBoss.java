@@ -43,29 +43,29 @@ public class CombateBoss {
     }
 
     private void gerarAtributos() {
-        // Escala dos atributos com base no nível
-        vidaJogador = hp + (nivelJogador * 5);
-        ataqueJogador = ataque + (nivelJogador / 2);
+    // Agora sincroniza com o HP real do jogador
+    vidaJogador = RPG2.hp;
+    ataqueJogador = RPG2.ataque + (nivelJogador / 2);
 
-        // Base do chefe
-        vidaBoss = 80 + (nivelJogador * 10);
-        ataqueBoss = (int) (8 + (nivelJogador / 1.5));
+    // Base do chefe
+    vidaBoss = 80 + (nivelJogador * 10);
+    ataqueBoss = (int) (8 + (nivelJogador / 1.5));
 
-        // Modificadores de tipo
-        switch (tipoBoss) {
-            case "agressivo" -> ataqueBoss *= 1.3;
-            case "defensivo" -> vidaBoss *= 1.4;
-            case "mágico" -> {
-                ataqueBoss *= 1.1;
-                vidaBoss *= 1.1;
-            }
-            case "caótico" -> ataqueBoss *= 1.6;
-            case "lendário" -> {
-                ataqueBoss *= 1.8;
-                vidaBoss *= 2.0;
-            }
+    // Modificadores de tipo
+    switch (tipoBoss) {
+        case "agressivo" -> ataqueBoss *= 1.3;
+        case "defensivo" -> vidaBoss *= 1.4;
+        case "mágico" -> {
+            ataqueBoss *= 1.1;
+            vidaBoss *= 1.1;
+        }
+        case "caótico" -> ataqueBoss *= 1.6;
+        case "lendário" -> {
+            ataqueBoss *= 1.8;
+            vidaBoss *= 2.0;
         }
     }
+}
 
     public boolean iniciarCombate() {
         Scanner sc = new Scanner(System.in);
@@ -104,6 +104,7 @@ public class CombateBoss {
 
             if (vidaBoss <= 0) {
                 System.out.println("Você derrotou o " + nomeBoss + "! Parabéns!");
+                RPG2.hp = vidaJogador; // sincroniza a vida final do jogador com o jogo principal
                 return true;
             }
 
@@ -165,4 +166,5 @@ public class CombateBoss {
         System.out.println("O " + nomeBoss + " ataca e causa " + dano + " de dano!");
         vidaJogador -= Math.max(dano, 0);
     }
+
 }
