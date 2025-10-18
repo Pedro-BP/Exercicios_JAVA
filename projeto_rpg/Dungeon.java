@@ -105,13 +105,13 @@ public class Dungeon {
             case 'T' -> {
                 System.out.println("💰 Você encontrou um TESOURO!");
                 int bonus = 10 + random.nextInt(20);
-                CombateBoss.vidaJogador += bonus;
+                RPG2.hp += bonus;
                 System.out.println("Sua vida máxima aumentou em " + bonus + "!");
             }
             case 'I' -> {
                 System.out.println("⚔️ Um inimigo aparece!");
                 int dano = 5 + random.nextInt(10);
-                CombateBoss.vidaJogador -= dano;
+                RPG2.hp -= dano;
                 System.out.println("Você luta bravamente e vence, mas perde " + dano + " de vida.");
             }
             case ' ' -> System.out.println("Você entra em uma sala vazia...");
