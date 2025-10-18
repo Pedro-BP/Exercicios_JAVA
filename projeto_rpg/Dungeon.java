@@ -104,15 +104,13 @@ public class Dungeon {
         switch (evento) {
             case 'T' -> {
                 System.out.println("💰 Você encontrou um TESOURO!");
-                int bonus = 10 + random.nextInt(20);
-                RPG2.hp += bonus;
-                System.out.println("Sua vida máxima aumentou em " + bonus + "!");
+                int ganho = 25 + random.nextInt(75);
+                RPG2.ouro += ganho;
+                System.out.println("Você encontrou " + ganho + " de ouro!");
             }
             case 'I' -> {
                 System.out.println("⚔️ Um inimigo aparece!");
-                int dano = 5 + random.nextInt(10);
-                RPG2.hp -= dano;
-                System.out.println("Você luta bravamente e vence, mas perde " + dano + " de vida.");
+                RPG2.batalha();
             }
             case ' ' -> System.out.println("Você entra em uma sala vazia...");
         }
