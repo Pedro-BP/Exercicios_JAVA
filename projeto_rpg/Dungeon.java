@@ -13,7 +13,7 @@ public class Dungeon {
     private Random random = new Random();
 
     // Novos atributos
-    private char[][] conteudoSala; // Guarda o tipo de sala: 'T' (tesouro), 'I' (inimigo), ' ' (vazia)
+    private char[][] conteudoSala; // Guarda o tipo de sala: 'T', 'I', 'A', 'M', ' ' etc.
 
     public Dungeon(int nivel) {
         this.tamanho = calcularTamanho(nivel);
@@ -67,7 +67,9 @@ public class Dungeon {
     private char gerarConteudoAleatorio() {
         int chance = random.nextInt(100);
         if (chance < 10) return 'T'; // 10% chance de tesouro
-        if (chance < 20) return 'I'; // 10% chance de inimigo
+        if (chance < 18) return 'I'; // 8% chance de inimigo
+        if (chance < 20) return 'A'; // 2% chance de Andarilho
+        if (chance < 23) return 'M'; // 3% chance de Armadilha
         return ' '; // sala vazia
     }
 
@@ -111,6 +113,14 @@ public class Dungeon {
             case 'I' -> {
                 System.out.println("⚔️ Um inimigo aparece!");
                 RPG2.batalha();
+            }
+            case 'A' -> {
+                System.out.println("👤 Você encontra um ANDARILHO misterioso...");
+                RPG2.andarilho(); // chama o método já existente no seu código
+            }
+            case 'M' -> {
+                System.out.println("☠️ Você ativou uma ARMADILHA!");
+                RPG2.armadilha(); // chama o método que você já tem pronto
             }
             case ' ' -> System.out.println("Você entra em uma sala vazia...");
         }
