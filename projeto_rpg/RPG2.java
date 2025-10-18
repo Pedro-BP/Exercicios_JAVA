@@ -94,6 +94,7 @@ public class RPG2 {
                 break;
             case 6:
                 Scanner sc = new Scanner(System.in);
+                CombateBoss.vidaJogador = hp;
                 Dungeon dungeon = new Dungeon(nivel);
 
                 while (true) {
@@ -105,6 +106,7 @@ public class RPG2 {
                         int resp = sc.nextInt();
                         System.out.println("\n");
                         if (resp == 1) {
+                            hp = CombateBoss.vidaJogador;
                             break;
                         } else {
                             dungeon.mostrar();
@@ -451,4 +453,5 @@ public class RPG2 {
 
         }
     }
+
 }
