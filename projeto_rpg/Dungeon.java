@@ -4,16 +4,18 @@ import java.util.Random;
 
 public class Dungeon {
 
-    private char[][] mapa;
-    private int tamanho;
+    private final char[][] mapa;
+    private final int tamanho;
     private int jogadorX, jogadorY;
     private int saidaX, saidaY;
     private int chefeX, chefeY;
-    private boolean[][] visitado;
-    private Random random = new Random();
+    private final boolean[][] visitado;
+    private final Random random = new Random();
+
+    private boolean chefeDerrotado = false;
 
     // Novos atributos
-    private char[][] conteudoSala; // Guarda o tipo de sala: 'T', 'I', 'A', 'M', ' ' etc.
+    private final char[][] conteudoSala; // Guarda o tipo de sala: 'T' (tesouro), 'I' (inimigo), ' ' (vazia)
 
     public Dungeon(int nivel) {
         this.tamanho = calcularTamanho(nivel);
@@ -39,10 +41,22 @@ public class Dungeon {
         // Gera entrada nas bordas
         int borda = random.nextInt(4);
         switch (borda) {
-            case 0 -> { jogadorX = 0; jogadorY = random.nextInt(tamanho); }
-            case 1 -> { jogadorX = tamanho - 1; jogadorY = random.nextInt(tamanho); }
-            case 2 -> { jogadorX = random.nextInt(tamanho); jogadorY = 0; }
-            case 3 -> { jogadorX = random.nextInt(tamanho); jogadorY = tamanho - 1; }
+            case 0 -> {
+                jogadorX = 0;
+                jogadorY = random.nextInt(tamanho);
+            }
+            case 1 -> {
+                jogadorX = tamanho - 1;
+                jogadorY = random.nextInt(tamanho);
+            }
+            case 2 -> {
+                jogadorX = random.nextInt(tamanho);
+                jogadorY = 0;
+            }
+            case 3 -> {
+                jogadorX = random.nextInt(tamanho);
+                jogadorY = tamanho - 1;
+            }
         }
 
         mapa[jogadorX][jogadorY] = 'E';
@@ -66,10 +80,12 @@ public class Dungeon {
 
     private char gerarConteudoAleatorio() {
         int chance = random.nextInt(100);
-        if (chance < 10) return 'T'; // 10% chance de tesouro
-        if (chance < 18) return 'I'; // 8% chance de inimigo
-        if (chance < 20) return 'A'; // 2% chance de Andarilho
-        if (chance < 23) return 'M'; // 3% chance de Armadilha
+        if (chance < 10) {
+            return 'T'; // 10% chance de tesouro
+        }
+        if (chance < 20) {
+            return 'I'; // 10% chance de inimigo
+        }
         return ' '; // sala vazia
     }
 
@@ -77,10 +93,14 @@ public class Dungeon {
         int novoX = jogadorX, novoY = jogadorY;
 
         switch (direcao) {
-            case 'w' -> novoX--;
-            case 's' -> novoX++;
-            case 'a' -> novoY--;
-            case 'd' -> novoY++;
+            case 'w' ->
+                novoX--;
+            case 's' ->
+                novoX++;
+            case 'a' ->
+                novoY--;
+            case 'd' ->
+                novoY++;
             default -> {
                 System.out.println("Comando inválido!");
                 return;
@@ -103,6 +123,7 @@ public class Dungeon {
 
     private void ativarEventoSala() {
         char evento = conteudoSala[jogadorX][jogadorY];
+
         switch (evento) {
             case 'T' -> {
                 System.out.println("💰 Você encontrou um TESOURO!");
@@ -112,19 +133,41 @@ public class Dungeon {
             }
             case 'I' -> {
                 System.out.println("⚔️ Um inimigo aparece!");
-                RPG2.batalha();
+                RPG2.batalha(); // usa o mesmo sistema de fora da dungeon
             }
-            case 'A' -> {
-                System.out.println("👤 Você encontra um ANDARILHO misterioso...");
-                RPG2.andarilho(); // chama o método já existente no seu código
+            case 'C' -> {
+                if (chefeDerrotado) {
+                    System.out.println("Aqui jaz o corpo do chefe derrotado...");
+                    break;
+                }
+                System.out.println("💀 Você entrou na sala do CHEFE!");
+                CombateBoss boss = new CombateBoss(RPG2.nivel);
+                int resultado = boss.iniciarCombate();
+
+                switch (resultado) {
+                    case 1 -> { // vitória
+                        chefeDerrotado = true;
+                        conteudoSala[jogadorX][jogadorY] = ' ';
+                        int recompensa = 500 + random.nextInt(500);
+                        RPG2.ouro += recompensa;
+                        System.out.println("💎 Você recebeu " + recompensa + " de ouro pela vitória!");
+                    }
+                    case 0 -> { // derrota
+                        System.out.println("Você foi derrotado pelo chefe...");
+                        RPG2.hp = 0;
+                    }
+                    case -1 -> { // fuga
+                        System.out.println("Você conseguiu escapar do chefe e retorna à dungeon!");
+                    }
+                }
             }
-            case 'M' -> {
-                System.out.println("☠️ Você ativou uma ARMADILHA!");
-                RPG2.armadilha(); // chama o método que você já tem pronto
-            }
-            case ' ' -> System.out.println("Você entra em uma sala vazia...");
+            case 'S' ->
+                System.out.println("🚪 Você encontrou a saída!");
+            case ' ' ->
+                System.out.println("Você entra em uma sala vazia...");
         }
-        conteudoSala[jogadorX][jogadorY] = ' '; // evita repetir evento
+
+        conteudoSala[jogadorX][jogadorY] = ' '; // evita repetir eventos
     }
 
     public void mostrar() {
@@ -138,7 +181,7 @@ public class Dungeon {
                     System.out.print("   ");
                 } else if (i == saidaX && j == saidaY) {
                     System.out.print("[S]");
-                } else if (i == chefeX && j == chefeY) {
+                } else if (i == chefeX && j == chefeY && !chefeDerrotado) {
                     System.out.print("[C]");
                 } else {
                     System.out.print(" * ");
@@ -154,6 +197,6 @@ public class Dungeon {
     }
 
     public boolean encontrouChefe() {
-        return jogadorX == chefeX && jogadorY == chefeY;
+        return jogadorX == chefeX && jogadorY == chefeY && !chefeDerrotado;
     }
 }
