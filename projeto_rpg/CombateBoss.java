@@ -1,26 +1,24 @@
 package com.mycompany.projeto_rpg;
 
-import static com.mycompany.projeto_rpg.RPG2.ataque;
-import static com.mycompany.projeto_rpg.RPG2.hp;
 import java.util.Random;
 import java.util.Scanner;
 
 public class CombateBoss {
 
-    static int vidaJogador;
-    private int nivelJogador;
+    private int vidaJogador;
+    private final int nivelJogador;
     private int vidaBoss;
     private int ataqueJogador;
     private int ataqueBoss;
-    private Random random = new Random();
+    private final Random random = new Random();
 
-    private String nomeBoss; // nome do chefe
-    private String tipoBoss; // tipo de comportamento (agressivo, defensivo, mágico etc.)
+    private String nomeBoss;
+    private String tipoBoss;
 
     public CombateBoss(int nivel) {
         this.nivelJogador = nivel;
-        definirTipoBoss();     // define o estilo do chefe
-        gerarAtributos();      // gera atributos conforme o nível e o tipo
+        definirTipoBoss();
+        gerarAtributos();
     }
 
     private void definirTipoBoss() {
@@ -43,32 +41,32 @@ public class CombateBoss {
     }
 
     private void gerarAtributos() {
-    // Agora sincroniza com o HP real do jogador
-    vidaJogador = RPG2.hp;
-    ataqueJogador = RPG2.ataque + (nivelJogador / 2);
+        vidaJogador = RPG2.hp;
+        ataqueJogador = RPG2.ataque + (nivelJogador / 2);
 
-    // Base do chefe
-    vidaBoss = 80 + (nivelJogador * 10);
-    ataqueBoss = (int) (8 + (nivelJogador / 1.5));
+        vidaBoss = 80 + (nivelJogador * 10);
+        ataqueBoss = (int) (8 + (nivelJogador / 1.5));
 
-    // Modificadores de tipo
-    switch (tipoBoss) {
-        case "agressivo" -> ataqueBoss *= 1.3;
-        case "defensivo" -> vidaBoss *= 1.4;
-        case "mágico" -> {
-            ataqueBoss *= 1.1;
-            vidaBoss *= 1.1;
-        }
-        case "caótico" -> ataqueBoss *= 1.6;
-        case "lendário" -> {
-            ataqueBoss *= 1.8;
-            vidaBoss *= 2.0;
+        switch (tipoBoss) {
+            case "agressivo" ->
+                ataqueBoss = (int) (ataqueBoss * 1.3);
+            case "defensivo" ->
+                vidaBoss = (int) (vidaBoss * 1.4);
+            case "mágico" -> {
+                ataqueBoss = (int) (ataqueBoss * 1.1);
+                vidaBoss = (int) (vidaBoss * 1.1);
+            }
+            case "caótico" ->
+                ataqueBoss = (int) (ataqueBoss * 1.6);
+            case "lendário" -> {
+                ataqueBoss = (int) (ataqueBoss * 1.8);
+                vidaBoss = (int) (vidaBoss * 2.0);
+            }
         }
     }
-}
 
-    public boolean iniciarCombate() {
-        Scanner sc = new Scanner(System.in);
+    public int iniciarCombate() {
+        Scanner sc = RPG2.scanner;
 
         System.out.println("\n⚔️  O " + nomeBoss.toUpperCase() + " APARECEU! ⚔️");
         System.out.println("Um inimigo " + tipoBoss + " está diante de você!\n");
@@ -78,46 +76,96 @@ public class CombateBoss {
             System.out.println("Sua vida: " + vidaJogador + " | Vida do Chefe: " + vidaBoss);
             System.out.println("=============================================");
             System.out.println("[1] Atacar");
-            System.out.println("[2] Defender");
-            System.out.println("[3] Curar");
-            System.out.println("[4] Fugir");
+            System.out.println("[2] Abrir inventário");
+            System.out.println("[3] Fugir");
             System.out.print("Escolha sua ação: ");
 
             int escolha = sc.nextInt();
+            sc.nextLine();
             System.out.println();
 
             switch (escolha) {
-                case 1 -> atacar();
-                case 2 -> defender();
-                case 3 -> curar();
-                case 4 -> {
+                case 1 ->
+                    atacar();
+                case 2 ->
+                    abrirInventarioDuranteCombate();
+                case 3 -> {
                     System.out.println("Você tenta fugir...");
                     if (random.nextInt(100) < 30) {
                         System.out.println("Você conseguiu escapar!");
-                        return false;
+                        RPG2.hp = vidaJogador;
+                        return -1;
                     } else {
                         System.out.println("O " + nomeBoss + " bloqueou sua fuga!");
                     }
                 }
-                default -> System.out.println("Comando inválido!");
+                default ->
+                    System.out.println("Comando inválido!");
             }
 
             if (vidaBoss <= 0) {
                 System.out.println("Você derrotou o " + nomeBoss + "! Parabéns!");
-                RPG2.hp = vidaJogador; // sincroniza a vida final do jogador com o jogo principal
-                return true;
+                int xpGanho = calcularXpRecompensa();
+                RPG2.xp += xpGanho;
+                System.out.println("✨ Você ganhou " + xpGanho + " de XP!");
+
+                RPG2.hp = vidaJogador;
+                return 1;
             }
 
-            // Turno do chefe
             ataqueDoChefe();
         }
 
         if (vidaJogador <= 0) {
             System.out.println("Você foi derrotado pelo " + nomeBoss + "...");
-            return false;
+            return 0;
+        }
+        return 0;
+    }
+
+    private void abrirInventarioDuranteCombate() {
+        if (RPG2.item.isEmpty()) {
+            System.out.println("Seu inventário está vazio!");
+            return;
         }
 
-        return true;
+        System.out.println("=== Inventário ===");
+        for (int i = 0; i < RPG2.item.size(); i++) {
+            System.out.println((i + 1) + ". " + RPG2.item.get(i));
+        }
+        System.out.print("Escolha um item para usar (ou 0 para voltar): ");
+        int escolha = RPG2.scanner.nextInt();
+        RPG2.scanner.nextLine();
+
+        if (escolha == 0) {
+            return;
+        }
+        if (escolha < 1 || escolha > RPG2.item.size()) {
+            System.out.println("Escolha inválida.");
+            return;
+        }
+
+        String itemUsado = RPG2.item.get(escolha - 1);
+        switch (itemUsado) {
+            case "Poção" -> {
+                vidaJogador += 30;
+                System.out.println("Você usa uma Poção e recupera 30 de HP!");
+                if (vidaJogador > 100) {
+                    vidaJogador = 100;
+                }
+                RPG2.item.remove(itemUsado);
+            }
+            case "Elixir dos Deuses" -> {
+                vidaJogador *= 2;
+                if (vidaJogador > 200) {
+                    vidaJogador = 200;
+                }
+                System.out.println("Você usa o Elixir dos Deuses! Seu HP dobra!");
+                RPG2.item.remove(itemUsado);
+            }
+            default ->
+                System.out.println("Este item não pode ser usado agora.");
+        }
     }
 
     private void atacar() {
@@ -126,22 +174,9 @@ public class CombateBoss {
         vidaBoss -= Math.max(dano, 0);
     }
 
-    private void defender() {
-        int dano = Math.max((ataqueBoss / 2) - random.nextInt(3), 0);
-        System.out.println("Você se defende! Recebe apenas " + dano + " de dano.");
-        vidaJogador -= dano;
-    }
-
-    private void curar() {
-        int cura = 10 + random.nextInt(10);
-        vidaJogador += cura;
-        System.out.println("Você se cura em " + cura + " pontos de vida.");
-    }
-
     private void ataqueDoChefe() {
         int dano = ataqueBoss + random.nextInt(6) - 2;
 
-        // comportamento especial conforme o tipo
         switch (tipoBoss) {
             case "mágico" -> {
                 if (random.nextInt(100) < 25) {
@@ -167,4 +202,20 @@ public class CombateBoss {
         vidaJogador -= Math.max(dano, 0);
     }
 
+    private int calcularXpRecompensa() {
+        return switch (tipoBoss) {
+            case "agressivo" ->
+                50;
+            case "defensivo" ->
+                80;
+            case "mágico" ->
+                120;
+            case "caótico" ->
+                180;
+            case "lendário" ->
+                300;
+            default ->
+                50;
+        };
+    }
 }
