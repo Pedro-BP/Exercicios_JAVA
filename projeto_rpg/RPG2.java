@@ -65,11 +65,11 @@ public class RPG2 {
         } else if (chance < 70) {
             armadilha();
         } else if (chance < 85) {
-            andarilho();
-        } else if (chance < 95) {
             descansar();
-        } else {
+        } else if (chance < 95) {
             entrarDungeon();
+        } else {
+            andarilho();
         }
     }
 
@@ -351,4 +351,5 @@ public class RPG2 {
         }
     }
 }
+
 
