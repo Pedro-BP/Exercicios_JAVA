@@ -14,6 +14,9 @@ public class RPG2 {
     static ArrayList<String> item = new ArrayList<>();
 
     public static void main(String[] args) {
+
+        pausa();
+        
         System.out.println("==========================================");
         System.out.println("           Bem-vindo ao RPG!");
         System.out.println("==========================================");
@@ -348,3 +351,4 @@ public class RPG2 {
         }
     }
 }
+
